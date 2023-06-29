@@ -26,9 +26,9 @@ namespace ConsoleApp1
             {
                 this.ClientList.Remove(id);
             }
-            public void AddAccount()
+            public void AddAccount(int clientId)
             {
-                AccountBase account = new AccountBase();
+                AccountBase account = new AccountBase(clientId);
                 this.AccountList.Add(account);
             }
             public void RemoveAccount(int id) 
@@ -41,7 +41,7 @@ namespace ConsoleApp1
         {
             private readonly List<Client> _clients = new List<Client>();
 
-            public void Add(Client client) { _clients.Add(client); }
+            public void Add(Client client) { this._clients.Add(client); }
             public void Remove(int id) {
                 Client client = this._clients.Find(item => item.Id == id);
                 this._clients.Remove(client); 
@@ -53,7 +53,7 @@ namespace ConsoleApp1
         {
             private readonly List<AccountBase> _accounts = new List<AccountBase>();
 
-            public void Add(AccountBase account) { _accounts.Add(account); }
+            public void Add(AccountBase account) { this._accounts.Add(account); }
             public void Remove(int id)
             {
                 AccountBase account = this._accounts.Find(item => item.Id == id);
@@ -85,15 +85,20 @@ namespace ConsoleApp1
 
             private TransactionHistory TransactionHistory = new TransactionHistory();
 
+            public AccountBase(int id)
+            {
+                this.Id = id;
+            }
+
             public void Withdraw(float money) {
                 this.Balance -= money;
                 Transaction transaction = new Transaction(this.Id, DateTime.Now, "Withdraw", money);
-                TransactionHistory.Add(transaction);
+                this.TransactionHistory.Add(transaction);
             }
             public void Deposit(float money) {
                 this.Balance += money;
                 Transaction transaction = new Transaction(this.Id, DateTime.Now, "Deposit", money);
-                TransactionHistory.Add(transaction);
+                this.TransactionHistory.Add(transaction);
             }
             public void GetTransactionInfo(int id)
             {
@@ -103,14 +108,15 @@ namespace ConsoleApp1
 
         public class Transaction
         {
-            private int Id { get; set; }
+            private int Id { get; set; } = 0;
+            private int AccountId { get; set; }  
             private string Date { get; set; }
             private string Operation { get; set; }
             private float Amount { get; set; }
 
-            public Transaction(int id, DateTime date, string operation, float amount)
+            public Transaction(int accountId, DateTime date, string operation, float amount)
             {
-                this.Id = id;
+                this.AccountId = accountId;
                 this.Date = date.ToString("dddd, dd MMMM yyyy HH:mm");
                 this.Operation = operation;
                 this.Amount = amount;
