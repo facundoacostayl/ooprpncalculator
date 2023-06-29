@@ -14,8 +14,18 @@ namespace ConsoleApp1
         
         public class Bank
         {
-            public void AddClient(Client client) { ClientList.Add(client) }
-            public void RemoveClient(Client client) { ClientList.Remove(client) }
+            private readonly ClientList ClientList = new ClientList();
+            private readonly AccountList AccountList = new AccountList();
+
+            public void AddClient() 
+            {
+                Client client = new Client();
+                this.ClientList.Add(client);
+            }
+            public void RemoveClient(int id) 
+            {
+                this.ClientList.Remove(id);
+            }
             public void AddAccount(AccountBase account) { AccountList.Add(account) }
             public void RemoveAccount(AccountBase account) { AccountList.Remove(account) }
         }
@@ -25,7 +35,10 @@ namespace ConsoleApp1
             private readonly List<Client> _clients = new List<Client>();
 
             public void Add(Client client) { _clients.Add(client); }
-            public void Remove(Client client) { _clients.Remove(client); }
+            public void Remove(int id) {
+                Client client = this._clients.Find(item => item.Id == id);
+                this._clients.Remove(client); 
+            }
         }
 
 
@@ -34,27 +47,41 @@ namespace ConsoleApp1
             private readonly List<AccountBase> _accounts = new List<AccountBase>();
 
             public void Add(AccountBase account) { _accounts.Add(account); }
-            public void Remove(AccountBase account) { _accounts.Remove(account); }
+            public void Remove(int id)
+            {
+                AccountBase account = this._accounts.Find(item => item.Id == id);
+                this._accounts.Remove(account);
+            }
         }
 
 
         public class Client
         {
-            private string Name { get; set; }
-            private string Lastname { get; set; }
-            private int Age { get; set; }
-            private int Id { get; set; }
+            public string Name { get; set; }
+            public string Lastname { get; set; }
+            public int Age { get; set; }
+            public int Id { get; set; }
         }
 
         public class AccountBase
         {
-            private int Id { get; set; }
-            private float Balance { get; set; } = 0f;
+            public int Id { get; set; }
+            public float Balance { get; set; } = 0f;
 
             private TransactionHistory TransactionHistory = new TransactionHistory();
 
-            public void Withdraw(float money) { this.Balance -= money; }
-            public void Deposit(float money) { this.Balance += money; }
+            public void Withdraw(float money) {
+                this.Balance -= money;
+                Transaction transaction = new Transaction();
+                transaction.Add(this.Id, DateTime.Now, "Withdraw", money);
+                TransactionHistory.Add(transaction);
+            }
+            public void Deposit(float money) {
+                this.Balance += money;
+                Transaction transaction = new Transaction();
+                transaction.Add(this.Id, DateTime.Now, "Deposit", money);
+                TransactionHistory.Add(transaction);
+            }
             public void GetTransactionInfo(int id)
             {
                 this.TransactionHistory.Display(id);
@@ -64,15 +91,16 @@ namespace ConsoleApp1
         public class Transaction
         {
             private int Id { get; set; }
-            private DateTime Date { get; set; }
+            private string Date { get; set; }
             private string Operation { get; set; }
             private float Amount { get; set; }
-            
-            private TransactionHistory History;
 
-            public void AddToHistory()
+            public void Add(int id, DateTime date, string operation, float amount)
             {
-                History.Add(new Transaction { Id = Id, Date = Date,Operation = Operation, Amount = Amount });
+                this.Id = id;
+                this.Date = date.ToString("dddd, dd MMMM yyyy HH:mm");
+                this.Operation = operation;
+                this.Amount = amount;
             }
         }
 
