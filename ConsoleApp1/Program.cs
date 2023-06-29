@@ -57,7 +57,7 @@ namespace ConsoleApp1
             public void Deposit(float money) { this.Balance += money; }
             public void GetTransactionInfo(int id)
             {
-                TransactionHistory.GetTransactionHistory(id);
+                this.TransactionHistory.Display(id);
             }
         }
 
@@ -68,7 +68,7 @@ namespace ConsoleApp1
             private string Operation { get; set; }
             private float Amount { get; set; }
             
-            private TransactionHistory History = new TransactionHistory();
+            private TransactionHistory History;
 
             public void AddToHistory()
             {
@@ -78,7 +78,7 @@ namespace ConsoleApp1
 
         public class TransactionHistory
         {
-            private Stack<Transaction> List;
+            private Stack<Transaction> List = new Stack<Transaction>();
 
             public void Add(Transaction transaction) { List.Push(transaction); }
             public void Display(int Id)
