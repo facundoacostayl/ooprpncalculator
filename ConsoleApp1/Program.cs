@@ -100,19 +100,19 @@ namespace ConsoleApp1
                 Transaction transaction = new Transaction(this.Id, DateTime.Now, "Deposit", money);
                 this.TransactionHistory.Add(transaction);
             }
-            public void GetTransactionInfo(int id)
+            public void GetTransactionInfo()
             {
-                this.TransactionHistory.Display(id);
+                this.TransactionHistory.Display(this.Id);
             }
         }
 
         public class Transaction
         {
-            private int Id { get; set; } = 0;
-            private int AccountId { get; set; }  
-            private string Date { get; set; }
-            private string Operation { get; set; }
-            private float Amount { get; set; }
+            public int Id { get; set; } = 0;
+            public int AccountId { get; set; }  
+            public string Date { get; set; }
+            public string Operation { get; set; }
+            public float Amount { get; set; }
 
             public Transaction(int accountId, DateTime date, string operation, float amount)
             {
@@ -127,12 +127,15 @@ namespace ConsoleApp1
         {
             private Stack<Transaction> List = new Stack<Transaction>();
 
-            public void Add(Transaction transaction) { List.Push(transaction); }
-            public void Display(int Id)
+            public void Add(Transaction transaction) { this.List.Push(transaction); }
+            public void Display(int transactionId)
             {
-                foreach(Transaction item in List)
+                foreach(Transaction item in this.List)
                 {
-                    Console.Write(item + "\b");
+                    if(item.Id == transactionId)
+                    {
+                        Console.Write(item + "\b");
+                    }
                 }
             }
         }
