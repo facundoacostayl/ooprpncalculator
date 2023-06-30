@@ -14,23 +14,23 @@ namespace ConsoleApp1
         
         public class Bank
         {
-            private readonly ClientList ClientList = new ClientList();
-            private readonly AccountList AccountList = new AccountList();
+            public ClientList ClientList { get; set; } = new ClientList();
+            public AccountList AccountList { get; set; } = new AccountList();
 
-            public void AddClient(string name, string lastname, int age) 
+            public Client AddClient(string name, string lastname, int age) 
             {
                 Client client = new Client(name, lastname, age);
                 this.ClientList.Add(client);
+                AccountBase clientBankAccount = client.BankAccount;
+                this.AccountList.Add(clientBankAccount);
+
+                return client;
             }
             public void RemoveClient(int id) 
             {
                 this.ClientList.Remove(id);
             }
-            public void AddAccount(int clientId)
-            {
-                AccountBase account = new AccountBase(clientId);
-                this.AccountList.Add(account);
-            }
+
             public void RemoveAccount(int id) 
             {
                 this.AccountList.Remove(id);
@@ -42,9 +42,14 @@ namespace ConsoleApp1
             private readonly List<Client> _clients = new List<Client>();
 
             public void Add(Client client) { this._clients.Add(client); }
-            public void Remove(int id) {
+            public void Remove(int id)
+            {
                 Client client = this._clients.Find(item => item.Id == id);
                 this._clients.Remove(client); 
+            }
+            public Client FindClient(int id)
+            {
+                return this._clients.Find(client => client.Id == id);
             }
         }
 
@@ -68,6 +73,7 @@ namespace ConsoleApp1
             public string Name { get; set; }
             public string Lastname { get; set; }
             public int Age { get; set; }
+            public AccountBase BankAccount { get; set; }
 
             public Client(string name, string lastName, int age)
             {
@@ -75,6 +81,7 @@ namespace ConsoleApp1
                 this.Name = name;
                 this.Lastname = lastName;
                 this.Age = age;
+                this.BankAccount = new AccountBase(this.Id);
             }
         }
 
@@ -83,7 +90,7 @@ namespace ConsoleApp1
             public int Id { get; set; }
             public float Balance { get; set; } = 0f;
 
-            private TransactionHistory TransactionHistory = new TransactionHistory();
+            private readonly TransactionHistory TransactionHistory = new TransactionHistory();
 
             public AccountBase(int id)
             {
@@ -92,15 +99,20 @@ namespace ConsoleApp1
 
             public void Withdraw(float money) {
                 this.Balance -= money;
-                Transaction transaction = new Transaction(this.Id, DateTime.Now, "Withdraw", money);
+                Transaction transaction = new Transaction(this.TransactionHistory.List.Count, this.Id, DateTime.Now, "Withdraw", money);
                 this.TransactionHistory.Add(transaction);
             }
             public void Deposit(float money) {
                 this.Balance += money;
-                Transaction transaction = new Transaction(this.Id, DateTime.Now, "Deposit", money);
+                Transaction transaction = new Transaction(this.TransactionHistory.List.Count, this.Id, DateTime.Now, "Deposit", money);
                 this.TransactionHistory.Add(transaction);
             }
-            public void GetTransactionInfo()
+            public void DisplayBalance()
+            {
+                Console.WriteLine(this.Balance);
+                Console.ReadLine();
+            }
+            public void DisplayTransactionInfo()
             {
                 this.TransactionHistory.Display(this.Id);
             }
@@ -108,14 +120,15 @@ namespace ConsoleApp1
 
         public class Transaction
         {
-            public int Id { get; set; } = 0;
+            public int Id { get; set; }
             public int AccountId { get; set; }  
             public string Date { get; set; }
             public string Operation { get; set; }
             public float Amount { get; set; }
 
-            public Transaction(int accountId, DateTime date, string operation, float amount)
+            public Transaction(int Id, int accountId, DateTime date, string operation, float amount)
             {
+                this.Id = Id;
                 this.AccountId = accountId;
                 this.Date = date.ToString("dddd, dd MMMM yyyy HH:mm");
                 this.Operation = operation;
@@ -125,19 +138,46 @@ namespace ConsoleApp1
 
         public class TransactionHistory
         {
-            private Stack<Transaction> List = new Stack<Transaction>();
+            public Stack<Transaction> List { get; set; } = new Stack<Transaction>();
 
             public void Add(Transaction transaction) { this.List.Push(transaction); }
-            public void Display(int transactionId)
+            public void Display(int accountId)
             {
-                foreach(Transaction item in this.List)
+
+                int i = 0;
+
+                while(i < this.List.Count)
                 {
-                    if(item.Id == transactionId)
+                    foreach (Transaction item in this.List)
                     {
-                        Console.Write(item + "\b");
+                        if (item.AccountId == accountId)
+                        {
+                            Console.WriteLine("Transaction ID: " + item.Id);
+                            Console.WriteLine("Date: " + item.Date);
+                            Console.WriteLine("Type: " + item.Operation);
+                            Console.WriteLine("Amount: " + item.Amount);
+                            Console.WriteLine("---------------");
+                            Console.WriteLine("\b");
+                        }
+
+                        i++;
                     }
                 }
+
+                Console.ReadLine();
             }
+        }
+
+        static void Main(string[] args)
+        {
+            Bank Galicia = new Bank();
+            Client Facundo = Galicia.AddClient("Facundo", "Acosta", 25);
+            Facundo.BankAccount.Deposit(95);
+            Facundo.BankAccount.Deposit(20);
+            Facundo.BankAccount.Deposit(200);
+            Facundo.BankAccount.Deposit(500);
+            Facundo.BankAccount.Withdraw(700);
+            Facundo.BankAccount.DisplayTransactionInfo();
         }
 
     }
