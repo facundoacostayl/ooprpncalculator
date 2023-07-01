@@ -17,15 +17,24 @@ namespace ConsoleApp1
             public ClientList ClientList { get; set; } = new ClientList();
             public AccountList AccountList { get; set; } = new AccountList();
 
-            public Client AddClient(string name, string lastname, int age) 
+            public void AddClient(string name, string lastname, int dna, int age) 
             {
-                Client client = new Client(name, lastname, age);
+                if(age < 18)
+                {
+                    Console.WriteLine("Clients must be over 18 years old");
+                    return;
+                }
+                Client client = new Client(name, lastname, dna, age);
                 this.ClientList.Add(client);
                 AccountBase clientBankAccount = client.BankAccount;
                 this.AccountList.Add(clientBankAccount);
-
+            }
+            public Client GetClient(int dna)
+            {
+                Client client = this.ClientList.FindClient(dna);
                 return client;
             }
+
             public void RemoveClient(int id) 
             {
                 this.ClientList.Remove(id);
@@ -47,9 +56,9 @@ namespace ConsoleApp1
                 Client client = this._clients.Find(item => item.Id == id);
                 this._clients.Remove(client); 
             }
-            public Client FindClient(int id)
+            public Client FindClient(int dna)
             {
-                return this._clients.Find(client => client.Id == id);
+                return this._clients.Find(client => client.DNA == dna);
             }
         }
 
@@ -72,14 +81,16 @@ namespace ConsoleApp1
             public int Id { get; set; }
             public string Name { get; set; }
             public string Lastname { get; set; }
+            public int DNA { get; set; }
             public int Age { get; set; }
             public AccountBase BankAccount { get; set; }
 
-            public Client(string name, string lastName, int age)
+            public Client(string name, string lastName, int dna, int age)
             {
                 this.Id = new Random().Next(100000, 999999);
                 this.Name = name;
                 this.Lastname = lastName;
+                this.DNA = dna;
                 this.Age = age;
                 this.BankAccount = new AccountBase(this.Id);
             }
@@ -171,13 +182,22 @@ namespace ConsoleApp1
         static void Main(string[] args)
         {
             Bank Galicia = new Bank();
-            Client Facundo = Galicia.AddClient("Facundo", "Acosta", 25);
-            Facundo.BankAccount.Deposit(95);
-            Facundo.BankAccount.Deposit(20);
-            Facundo.BankAccount.Deposit(200);
-            Facundo.BankAccount.Deposit(500);
-            Facundo.BankAccount.Withdraw(700);
-            Facundo.BankAccount.DisplayTransactionInfo();
+            Galicia.AddClient("Facundo", "Acosta", 40259811, 17);
+            Client Facundo = Galicia.GetClient(40259811);
+
+            if(Facundo == null)
+            {
+                Console.WriteLine("Client doesn't exist");
+                Console.ReadLine();
+            }
+
+            if(Facundo != null)
+            {
+                Facundo.BankAccount.Deposit(200);
+                Facundo.BankAccount.Withdraw(100);
+                Facundo.BankAccount.DisplayTransactionInfo();
+            }
+
         }
 
     }
